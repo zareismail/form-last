@@ -1,0 +1,29 @@
+{
+    "name": "annisa/form",
+    "license": "MIT",
+    "keywords": ["annisa", "laravel", "form"],
+    "description" : "A laravel form builder/manager based on laravelcollective package; inspired of joomla form builder.",
+    "authors": [
+        {
+            "name": "Esmaiel Zareh",
+            "email": "zarehesmaiel@gmail.com"
+        }
+    ],
+    "require": {
+        "laravelcollective/html": "^5.2.0" 
+    },
+    "autoload": { 
+        "psr-4": {
+            "Annisa\\Form\\": "form/src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Annisa\\Form\\AnnisaServiceProvider"
+            ] 
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

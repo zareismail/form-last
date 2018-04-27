@@ -1,0 +1,16 @@
+<?php 
+namespace DummyNamespace;
+
+use Annisa\Form\AnnisaBuilder; 
+
+/**
+* 
+*/ 
+class DummyClass extends AnnisaBuilder
+{ 
+	public function build()
+	{ 
+	 	// $this 
+	 	// 	  ->field('text', 'title');
+	} 
+}
