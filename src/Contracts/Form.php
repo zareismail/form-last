@@ -29,17 +29,9 @@ interface Form
 	 * Appending or Getting child form.
 	 * 
 	 * @param  string  $prefix   
-	 * @param  Closure|null $callback form build callback
+	 * @param  Closure $callback form build callback
 	 * 
 	 * @return Form\Builder
 	 */
-	public function child(string $prefix, Closure $callback = null); 
-	 
-	/**
-	 * Appending or Getting form prefix.
-	 * 
-	 * @param  string  $prefix    
-	 * @return string|Form\Builder
-	 */
-	public function prefix(string $prefix=null); 
+	public function child(string $prefix, Closure $callback); 
 }

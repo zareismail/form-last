@@ -16,6 +16,13 @@ abstract class AnnisaBuilder implements Form
 	private $builded = false; 
 
 	/**
+	 * Form name.
+	 * 
+	 * @var Object|null
+	 */
+	public $name = 'my-form';  
+
+	/**
 	 * Form parent.
 	 * 
 	 * @var Object|null
@@ -102,41 +109,204 @@ abstract class AnnisaBuilder implements Form
 	} 
 
 	/**
-	 * Appending or Getting child form.
+	 * Alias of setName.
 	 * 
-	 * @param  array  $prefixe   
-	 * @param  boolean
-	 * 
+	 * @param  string|null $name  
 	 * @return Illuminate\Support\Collection
 	 */
-	public function childs(array $prefixe = [])
-	{ 
-		$filters = collect((array) $prefixe)->flip();
+	public function name(string $name = null)
+	{    
+		return $this->setName($name);
+	} 
 
-		return $this->childs->filter(function($child) use ($filters) {   
-			return $filters->count()? $filters->has($child->prefix()) : true; 
-		});
+	/**
+	 * Appending name to form.
+	 * 
+	 * @param  string|null $name  
+	 * @return Illuminate\Support\Collection
+	 */
+	public function setName(string $name = null)
+	{   
+		$this->name = $name; 
+
+		return $this;
+	} 
+
+	/**
+	 * Getting form name.
+	 * 
+	 * @param  void   
+	 * @return Illuminate\Support\Collection
+	 */
+	public function getName()
+	{  
+		return $this->name;
+	} 
+/**
+	 * Alias of setParent.
+	 * 
+	 * @param  Form\Builder $parent     
+	 * @return Form\Builder
+	 */
+	public function parent(Form $parent = null)
+	{   
+		return $this->setParent($parent); 
+	} 
+
+	/**
+	 * Appending parent form.
+	 * 
+	 * @param  Form\Builder $parent     
+	 * @return Form\Builder
+	 */
+	public function setParent(Form $parent = null)
+	{  
+		$this->parent = $parent;
+
+		return $this; 
+	} 
+
+	/**
+	 * Getting parent form.
+	 * 
+	 * @param  void     
+	 * @return Form\Builder
+	 */
+	public function getParent()
+	{  
+		return $this->parent;
+	} 
+
+	/**
+	 * Alias of setPrefix.
+	 *  
+	 * @param  string  $prefix    
+	 * @return string|Form\Builder
+	 */
+	public function prefix(string $prefix=null)
+	{  
+		return $this->setPrefix($prefix);
+	} 
+
+	/**
+	 * Appending or Getting form prefix.
+	 *  
+	 * @param  string  $prefix    
+	 * @return string|Form\Builder
+	 */
+	public function setPrefix(string $prefix=null)
+	{ 
+		$this->prefix = $prefix;
+
+		return $this;
+	}  
+
+	/**
+	 * Getting form prefix.
+	 * 
+	 * @param  void    
+	 * @return string|Form\Builder
+	 */
+	public function getPrefix()
+	{  
+		return $this->prefix;
+	} 
+
+	/**
+	 * Alias of setModel.
+	 * 
+	 * @param  string $model   
+	 * @return string | object
+	 */
+	public function model($model = null)
+	{  
+		return $this->setModel($model);
+	}
+
+	/**
+	 * Appending Form Model.
+	 * 
+	 * @param  string $model   
+	 * @return string | object
+	 */
+	public function setModel($model = null)
+	{  
+		$this->model = $model;
+
+		return $this;
+	}
+
+	/**
+	 * Getting Form Model.
+	 * 
+	 * @param  void   
+	 * @return string | object
+	 */
+	public function getModel()
+	{
+		return $this->model; 
+	}
+
+	/**
+	 * Alias of setChild
+	 * 
+	 * @param  string  $name   
+	 * @param  Closure|null $callback form build callback
+	 * 
+	 * @return Form\Builder
+	 */
+	public function child(string $name, Closure $callback)
+	{     
+		return $this->setChild($name, $callback); 
 	} 
 
 	/**
 	 * Appending or Getting child form.
 	 * 
-	 * @param  string  $prefix   
+	 * @param  string  $name   
 	 * @param  Closure|null $callback form build callback
 	 * 
 	 * @return Form\Builder
 	 */
-	public function child(string $prefix, Closure $callback = null)
-	{ 
-		if(! is_null($callback)) { 
-			$child = $this->toBase($callback)->prefix($prefix)->parent($this);
+	public function setChild(string $name, Closure $callback)
+	{    
+		$child = $this->toBase($callback)->name($name)->parent($this);
 
-			$this->childs->put($prefix, $child);
+		$this->childs->put($name, $child);
 
-			return $this;
+		return $this; 
+	} 
+
+	/**
+	 * Appending or Getting child form.
+	 * 
+	 * @param  string  $name     
+	 * @return Form\Builder
+	 */
+	public function getChild(string $name)
+	{     
+		if($this->childs->has($name)) { 
+			return $this->childs->get($name);
 		}
 
-		return $this->childs->get($prefix);
+		throw new NotExistsForm($name); 
+	} 
+
+	/**
+	 * Appending or Getting child form.
+	 * 
+	 * @param  array  $names   
+	 * @param  boolean
+	 * 
+	 * @return Illuminate\Support\Collection
+	 */
+	public function childs(array $names = [])
+	{ 
+		$filters = collect((array) $names)->flip();
+
+		return $this->childs->filter(function($child) use ($filters) {   
+			return $filters->count()? $filters->has($child->getName()) : true; 
+		});
 	} 
 
 	/**
@@ -159,42 +329,8 @@ abstract class AnnisaBuilder implements Form
 	public function isChild()
 	{  
 		return $this->parent instanceof Form;
-	}
-
-	/**
-	 * Appending or Getting parent form.
-	 * 
-	 * @param  Form\Builder $parent    
-	 * 
-	 * @return Form\Builder
-	 */
-	public function parent(Form $parent=null)
-	{ 
-		if(! is_null($parent)) {   
-			$this->parent = $parent;
-
-			return $this;
-		}
-
-		return $this->parent;
 	} 
-
-	/**
-	 * Appending or Getting form prefix.
-	 * 
-	 * @param  string  $prefix    
-	 * @return string|Form\Builder
-	 */
-	public function prefix(string $prefix=null)
-	{
-		if(! is_null($prefix)) {
-			$this->prefix = $prefix;
-
-			return $this;
-		}
-
-		return $this->prefix;
-	} 
+	
 
 	/**
 	 * Saving callback.
@@ -279,23 +415,6 @@ abstract class AnnisaBuilder implements Form
 
 		return $this;
 	} 
-
-	/**
-	 * Form Model.
-	 * 
-	 * @param  string $model   
-	 * @return string | object
-	 */
-	public function model($model = null)
-	{
-		if(is_null($model)) {
-			return $this->model;
-		}
-		
-		$this->model = $model;
-
-		return $this;
-	}
 
 	/**
 	 * Appending a form element.
