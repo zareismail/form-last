@@ -20,7 +20,7 @@ abstract class AnnisaBuilder implements Form
 	 * 
 	 * @var Object|null
 	 */
-	public $name = 'my-form';  
+	protected $name = 'my-form';  
 
 	/**
 	 * Form parent.
@@ -546,11 +546,11 @@ abstract class AnnisaBuilder implements Form
 		$names = collect((array) $name)->flip();
 
 		return $this->rows->filter(function($row) use ($names, $force) {   
-			if($names->count()) {  
-				return $names->has($row['name']) && ($force || !$this->isRendered($row['name']));
+			if($names->count() && !$names->has($row['name'])) {  
+				return false; 
 			}
 
-			return true; 
+			return $force || !$this->isRendered($row['name']); 
 		});
 	}
 
