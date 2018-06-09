@@ -21,9 +21,12 @@
         "laravel": {
             "providers": [
                 "Annisa\\Form\\AnnisaServiceProvider"
-            ] 
+            ]  
+        }, 
+        "branch-alias": {
+            "dev-master": "1.1-dev"
         }
-    },
+    },  
     "minimum-stability": "dev",
     "prefer-stable": true
 }
