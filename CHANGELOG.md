@@ -6,7 +6,7 @@ Version 1.1.0
 * Added the following methods to `FormBuilder`:
   * `name()`
   * `getName()`
-  * `getName()`  
+  * `setName()`  
   * `getPrefix()`
   * `setPrefix()` 
   * `getModel()`
@@ -17,14 +17,13 @@ Version 1.1.0
   * `setChild()` 
 
 ### Fixed
-
-* Except rendered row of fetched rows
+ 
 * Filtering rendered rows at retrieving all rows
 
  
 ### Changed
 
 * Save child forms with names instead of prefixes
-* Used the parent, prefix, model, child method for the alias of setter methods
+* Used the `parent()`, `prefix()`, `model()`, `child()`, `name()` method's for the alias of setter methods
 
  
