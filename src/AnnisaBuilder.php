@@ -457,7 +457,7 @@ abstract class AnnisaBuilder implements Form
 	 */
 	public function render($rows = [], $force=false) 
 	{     
-		$this->builder->setModel($this->model());  
+		$this->builder->setModel($this->getModel());  
 
 		$this->runBuilder(); 
  	
