@@ -1,6 +1,8 @@
 <?php 
 namespace Annisa\Form; 
  
+use Annisa\Form\Exceptions\FormNotFound;
+use Illuminate\Support\HtmlString;
 use Annisa\Form\Contracts\Form;
 use Closure;
 
@@ -289,7 +291,7 @@ abstract class AnnisaBuilder implements Form
 			return $this->childs->get($name);
 		}
 
-		throw new NotExistsForm($name); 
+		throw new FormNotFound("Form {$name} Not Found."); 
 	} 
 
 	/**
@@ -358,11 +360,13 @@ abstract class AnnisaBuilder implements Form
 	{
 		$validInputs = collect([]); 
 
-		foreach ($this->rows() as $row) {
-			if($name = array_get($row, 'name')) { 
-				$validInputs->put($name, $this->getInput($name)); 
-			} 
-		}   
+		foreach ($this->rows() as $name => $row) {
+			$inputName = array_get($row, 'name', $name);
+ 
+			$validInputs->put(
+				$name, $this->getInput($this->inputKey($inputName))
+			); 
+		}     
 
 		$this->arrayTransform($validInputs->toArray());
 
@@ -370,6 +374,19 @@ abstract class AnnisaBuilder implements Form
 			'original'	=> $this->getOriginal(), 
 			'transformed' => $this->getTransformed()
 		]);
+	}
+
+	/**
+	 * Make dot notaion name for array input. 
+	 *
+	 * @param string $name
+	 * @return string
+	 */
+	public function inputKey($name)
+	{ 
+		return preg_replace_callback('/\[([^\[\]]*)\]/', function($matches) {
+			return ".{$matches[1]}";
+		}, $name);
 	}
 
 	/**
@@ -409,8 +426,8 @@ abstract class AnnisaBuilder implements Form
 	 */
 	public function merge($rowName, Closure $callback)
 	{
-		$this->rows = $this->rows->map(function($row) use ($rowName, $callback) { 
-			return ($rowName == $row['name']) ? $callback($row) : $row;
+		$this->rows = $this->rows->map(function($row, $name) use ($rowName, $callback) { 
+			return ($rowName == $name) ? $callback($row) : $row;
 		});
 
 		return $this;
@@ -427,8 +444,10 @@ abstract class AnnisaBuilder implements Form
 	public function element(string $type, string $name)
 	{   
 		$args = (array) array_except(func_get_args(), [0,1]);   
+		$key  = $name;
+		$name = $this->appendPrefix($name);
 
-		$this->rows->put($this->appendPrefix($name), compact('type', 'name') + $args);
+		$this->rows->put($key, compact('type', 'name') + $args);
 
 		return $this; 
 	} 
@@ -461,22 +480,22 @@ abstract class AnnisaBuilder implements Form
 
 		$this->runBuilder(); 
  	
-	 	foreach ($this->rows((array) $rows, $force) as $row) {  
+	 	foreach ($this->rows((array) $rows, $force) as $name => $row) {  
 
 	 		$this->event('row.rendering', $row);
 
-	 		echo $this->toHtml($row); 
+	 		$rendered = $this->toHtml($row); 
 
-	 		$this->event('row.rendered', $row); 
+	 		$this->event('row.rendered', $rendered = $this->toHtml($row)); 
 
-	 		$this->renderedRows($row['name']);
-	 	} 
+	 		echo $rendered;
 
-	 	$this->childs()->each(function ($child) use ($rows) { 
-	 		return empty($rows)? $child->render() : false;
-	 	});
+	 		$this->renderedRows($name);
+	 	}  
 
-		return ''; 
+		return (
+			new HtmlString(empty($rows)? '' : $this->childs()->implode(''))
+		)->toHtml();   
 	}
 
 	/**
@@ -545,12 +564,12 @@ abstract class AnnisaBuilder implements Form
 	{
 		$names = collect((array) $name)->flip();
 
-		return $this->rows->filter(function($row) use ($names, $force) {   
-			if($names->count() && !$names->has($row['name'])) {  
+		return $this->rows->filter(function($row, $name) use ($names, $force) {   
+			if($names->count() && !$names->has($name)) {  
 				return false; 
 			}
 
-			return $force || !$this->isRendered($row['name']); 
+			return $force || !$this->isRendered($name); 
 		});
 	}
 
@@ -576,7 +595,7 @@ abstract class AnnisaBuilder implements Form
 	{  
 		foreach ((array) $this->events->get($event) as $callback) {
 			if(is_callable($callback)) {
-				call_user_func_array($callback, [$this, $row]);
+				$callback($row);
 			}
 		}  
 	}  
@@ -620,9 +639,16 @@ abstract class AnnisaBuilder implements Form
 	 */
 	protected function appendPrefix(string $name)
 	{  
-		$trimmed = rtrim($name, ']');
+		if(! empty($this->prefix)) {
 
-		return isset($this->prefix)? "{$this->prefix}[$trimmed]" : $name;
+			preg_match_all('/[^\[\]]+/', $name, $matches);
+	 		
+	 		$wrraped = implode($matches[0], ']['); 
+				 
+			return "{$this->prefix}[{$wrraped}]"; 
+		}
+
+		return $name;
 	}
 
 	/**

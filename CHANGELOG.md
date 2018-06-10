@@ -1,4 +1,25 @@
-Version 1.1.0
+Version 1.1.2
+----------------- 
+
+### Added
+ 
+* Added FormNotFond Exception for not existence child's.
+
+### Fixed
+ 
+* Retrieving input by dot notation.
+* Improve the name prefix.
+
+ 
+### Changed
+
+* Appending rows into field stack by real name without prefix.
+* Appending rows into rendered stack by real name without prefix.
+* Removed form instance parameters from merge callback method.
+* Passing rendered row into internal rendering event.
+
+ 
+Version 1.1.1
 ----------------- 
 
 ### Added
