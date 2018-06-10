@@ -14,7 +14,7 @@
     },
     "autoload": { 
         "psr-4": {
-            "Annisa\\Form\\": "form/src/"
+            "Annisa\\Form\\": "src/"
         }
     },
     "extra": {
